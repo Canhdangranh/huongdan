@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Câu hỏi điền khuyết - Chọn và Thả</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Open Sans, sans-serif;
+        }
+        .question-container {
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .input-box {
+            width: 200px;
+            padding: 5px;
+            margin: 0 5px;
+            font-size: 16px;
+            text-align: center;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            display: inline-block;
+            height: 30px;
+            vertical-align: middle;
+            cursor: pointer;
+            color: gray; /* Đặt màu chữ xám */
+        }
+        .answer {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .check-answer, .retry-answer, .show-solution {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        .result {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .solution {
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: normal;
+            display: none;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="question-container">
+    
+    <p> • Khi biến cố A xảy ra thì số TV bị lỗi còn lại là <span class="input-box" id="drop1" ondragover="allowDrop(event)" ondrop="dropAnswer(event, this)">Kéo thả đáp án vào</span>. </p>
+    <p> • Trong trường hợp biến cố A xảy ra, xác suất của biến cố B là <span class="input-box" id="drop2" ondragover="allowDrop(event)" ondrop="dropAnswer(event, this)">Kéo thả đáp án vào</span>.</p>
+    <p>• Trong trường hợp biến cố A không xảy ra, xác suất của biến cố B là <span class="input-box" id="drop3" ondragover="allowDrop(event)" ondrop="dropAnswer(event, this)">Kéo thả đáp án vào</span>.</p>
+
+    <div>
+        <div class="answer" id="answerA" draggable="true" ondragstart="drag(event)"> <img src="https://latex.codecogs.com/svg.image?14" alt="14"> </div>
+        <div class="answer" id="answerA" draggable="true" ondragstart="drag(event)"> <img src="https://latex.codecogs.com/svg.image?16" alt="16"> </div>
+        <div class="answer" id="answerA" draggable="true" ondragstart="drag(event
+)"> <img src="https://latex.codecogs.com/svg.image?\dfrac{15}{240}" alt="15/240"> </div>
+        <div class="answer" id="answerB" draggable="true" ondragstart="drag(event)"> <img src="https://latex.codecogs.com/svg.image?\dfrac{15}{239}" alt="15/239"> </div>
+        <div class="answer" id="answerC" draggable="true" ondragstart="drag(event)"> <img src="https://latex.codecogs.com/svg.image?\dfrac{15}{240}" alt="225/240"> </div>
+        <div class="answer" id="answerD" draggable="true" ondragstart="drag(event)"> <img src="https://latex.codecogs.com/svg.image?\dfrac{14}{239}" alt="14/239"> </div>
+    </div>
+
+    <div class="button-container">
+        <button class="check-answer" onclick="checkAnswers()">Kiểm tra</button>
+        <button class="retry-answer" onclick="resetAnswers()">Thử lại</button>
+        <button class="show-solution" onclick="toggleSolution()">Hiển thị lời giải</button>
+    </div>
+
+    <div id="result" class="result"></div>
+    <div id="solution" class="solution">
+        <strong>Lời giải:</strong> 
+        <p> Khi biến cố A xảy ra, số TV bị lỗi còn lại là 14. </p>
+        <p> Khi biến cố A xảy ra, xác suất xảy ra biến cố B là <img src='https://latex.codecogs.com/svg.image?\dfrac{14}{239}' display=inline> </p>
+        <p> Khi biến cố A không xảy ra, số TV bị lỗi còn lại vẫn là 15, trong khi tổng số TV còn lại là 239, do đó xác suất của biến cố B khi biến cố A không xảy ra là <img src='https://latex.codecogs.com/svg.image?\dfrac{15}{239}' display=inline> </p>
+    </div>
+</div>
+
+<script>
+    function drag(event) {
+        event.dataTransfer.setData("text/html", event.target.outerHTML);
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function dropAnswer(event, target) {
+        event.preventDefault();
+        const imgElement = event.dataTransfer.getData("text/html");
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = imgElement;
+        const img = tempDiv.querySelector('img');
+
+        target.innerHTML = img.outerHTML; // Ghi lại thẻ img vào ô
+        target.setAttribute("data-answer", img.alt); // Lưu giá trị alt
+    }
+
+    const correctAnswers = {
+        drop1: "14", 
+        drop2: "14/239",
+        drop3: "15/239"
+    };
+
+    function checkAnswers() {
+        let correctCount = 0;
+        let total = Object.keys(correctAnswers).length;
+
+        for (let key in correctAnswers) {
+            const userAnswer = document.getElementById(key).getAttribute("data-answer");
+            if (userAnswer === correctAnswers[key]) {
+                correctCount++;
+                document.getElementById(key).style.backgroundColor = "#c8f7c5"; // Màu xanh cho đúng
+            } else {
+                document.getElementById(key).style.backgroundColor = "#f7c5c5"; // Màu đỏ cho sai
+            }
+        }
+
+        const resultDiv = document.getElementById("result");
+        if (correctCount === total) {
+            resultDiv.textContent = "Chính xác! Bạn đã trả lời đúng tất cả.";
+            resultDiv.className = "result correct";
+        } else {
+            resultDiv.textContent = `Bạn trả lời đúng ${correctCount}/${total} câu. Vui lòng thử lại.`;
+            resultDiv.className = "result incorrect";
+        }
+    }
+
+    function resetAnswers() {
+        const inputBoxes = document.querySelectorAll(".input-box");
+        inputBoxes.forEach(box => {
+            box.innerHTML = "Kéo thả đáp án vào"; 
+            box.style.backgroundColor = "#fff";
+            box.removeAttribute("data-answer");
+            box.style.color = "gray"; // Đặt lại màu chữ xám
+        });
+        document.getElementById("result").textContent = "";
+    }
+
+    function toggleSolution() {
+        const solutionDiv = document.getElementById("solution");
+        solutionDiv.style.display = solutionDiv.style.display === "none" || solutionDiv.style.display === "" ? "block" : "none";
+    }
+</script>
+
+</body>
+</html>
